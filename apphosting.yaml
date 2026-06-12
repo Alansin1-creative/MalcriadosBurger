@@ -17,17 +17,16 @@ env:
   - variable: NODE_ENV
     value: production
     availability:
-      - BUILD
       - RUNTIME
 
-  # Reemplaza con tu URL real tras el primer deploy (ej. malcriados--PROJECT_ID.us-central1.hosted.app)
   - variable: NEXT_PUBLIC_SITE_URL
     value: https://malcriados--malcriadosburger-958b8.us-central1.hosted.app
     availability:
       - BUILD
       - RUNTIME
 
-  # Secretos: créalos con `firebase apphosting:secrets:set NOMBRE` y descomenta las líneas.
+  # Secretos: créalos con `firebase apphosting:secrets:set NOMBRE` y descomenta.
+  # Mientras no existan en Secret Manager, el deploy falla.
   # - variable: ADMIN_EMAIL
   #   secret: ADMIN_EMAIL
   # - variable: ADMIN_PASSWORD
