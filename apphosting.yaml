@@ -1,0 +1,42 @@
+# Firebase App Hosting — Malcriados Burger
+# Docs: https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  minInstances: 0
+  maxInstances: 10
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 1024
+
+env:
+  - variable: DATABASE_DIR
+    value: /tmp/data
+    availability:
+      - RUNTIME
+
+  - variable: NODE_ENV
+    value: production
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Reemplaza con tu URL real tras el primer deploy (ej. malcriados--PROJECT_ID.us-central1.hosted.app)
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://malcriados--malcriadosburger-958b8.us-central1.hosted.app
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Secretos: créalos con `firebase apphosting:secrets:set NOMBRE` y descomenta las líneas.
+  # - variable: ADMIN_EMAIL
+  #   secret: ADMIN_EMAIL
+  # - variable: ADMIN_PASSWORD
+  #   secret: ADMIN_PASSWORD
+  # - variable: MERCADOPAGO_ACCESS_TOKEN
+  #   secret: MERCADOPAGO_ACCESS_TOKEN
+  # - variable: MERCADOPAGO_PAYMENT_LINK
+  #   secret: MERCADOPAGO_PAYMENT_LINK
+  # - variable: RESEND_API_KEY
+  #   secret: RESEND_API_KEY
+  # - variable: EMAIL_FROM
+  #   secret: EMAIL_FROM

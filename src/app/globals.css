@@ -1,0 +1,574 @@
+@import "tailwindcss";
+
+:root {
+  --diner-bg: #1a120c;
+  --diner-surface: #2a1e14;
+  --diner-card: #352618;
+  --diner-paper: #fff8eb;
+  --ketchup: #d62828;
+  --ketchup-dark: #a81f1f;
+  --mustard: #f7b538;
+  --mustard-light: #ffd166;
+  --cream: #fff4e0;
+  --food-muted: #c9b89a;
+  --food-border: #5c4033;
+  --food-border-light: #7a5540;
+  --background: var(--diner-bg);
+  --foreground: var(--cream);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-diner-bg: var(--diner-bg);
+  --color-diner-surface: var(--diner-surface);
+  --color-diner-card: var(--diner-card);
+  --color-diner-paper: var(--diner-paper);
+  --color-ketchup: var(--ketchup);
+  --color-ketchup-dark: var(--ketchup-dark);
+  --color-mustard: var(--mustard);
+  --color-mustard-light: var(--mustard-light);
+  --color-cream: var(--cream);
+  --color-food-muted: var(--food-muted);
+  --color-food-border: var(--food-border);
+  --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-fredoka);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+body {
+  background-color: var(--diner-bg);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(214, 40, 40, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(247, 181, 56, 0.1) 0%, transparent 50%),
+    repeating-linear-gradient(
+      -12deg,
+      transparent,
+      transparent 72px,
+      rgba(92, 64, 51, 0.06) 72px,
+      rgba(92, 64, 51, 0.06) 73px
+    );
+  color: var(--cream);
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+* {
+  box-sizing: border-box;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Header unificado */
+.app-header-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  border: 1px solid var(--food-border);
+  background: var(--diner-card);
+  padding: 0.5rem;
+  color: var(--mustard);
+  transition: border-color 0.15s ease;
+}
+
+.app-header-btn:hover {
+  border-color: var(--mustard);
+}
+
+.app-page-header h1 {
+  font-family: var(--font-fredoka), var(--font-geist-sans), sans-serif;
+  color: var(--cream);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Franja tipo toldo de fonda */
+.diner-awning {
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--ketchup) 0,
+    var(--ketchup) 16px,
+    var(--mustard) 16px,
+    var(--mustard) 32px,
+    var(--ketchup) 32px,
+    var(--ketchup) 48px
+  );
+}
+
+.font-display {
+  font-family: var(--font-fredoka), var(--font-geist-sans), system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+/* Paneles y tarjetas estilo carta de comida */
+.food-panel {
+  border-radius: 0.875rem;
+  border: 1px solid var(--food-border);
+  background: linear-gradient(165deg, rgba(53, 38, 24, 0.92) 0%, rgba(36, 26, 18, 0.96) 100%);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 244, 224, 0.07);
+}
+
+.food-card {
+  border-radius: 0.75rem;
+  border: 1px solid var(--food-border);
+  background: linear-gradient(180deg, rgba(45, 32, 22, 0.95) 0%, rgba(35, 25, 17, 0.98) 100%);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.food-card:hover {
+  border-color: var(--mustard);
+  box-shadow: 0 0 0 1px rgba(247, 181, 56, 0.25), 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.food-card-interactive:active {
+  transform: scale(0.99);
+}
+
+.food-menu-item {
+  border-radius: 0.75rem;
+  border: 2px solid var(--food-border);
+  background: linear-gradient(180deg, #3d2c1e 0%, #2d2118 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 244, 224, 0.05);
+}
+
+.food-menu-item:hover {
+  border-color: var(--mustard);
+  background: linear-gradient(180deg, #453220 0%, #322418 100%);
+}
+
+.food-category-title {
+  font-family: var(--font-fredoka), sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mustard);
+  border-bottom: 2px dashed var(--food-border);
+  padding-bottom: 0.35rem;
+}
+
+.food-note {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--mustard-light);
+  opacity: 0.95;
+}
+
+.food-price {
+  font-family: var(--font-fredoka), sans-serif;
+  font-weight: 700;
+  color: var(--mustard);
+}
+
+.food-subtitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--mustard-light);
+}
+
+.food-muted {
+  color: var(--food-muted);
+}
+
+.food-input {
+  border-radius: 0.5rem;
+  border: 1px solid var(--food-border);
+  background: rgba(26, 18, 12, 0.8);
+  color: var(--cream);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.food-input:focus {
+  outline: none;
+  border-color: var(--mustard);
+  box-shadow: 0 0 0 2px rgba(247, 181, 56, 0.2);
+}
+
+.btn-food {
+  border-radius: 0.5rem;
+  background: linear-gradient(180deg, var(--ketchup) 0%, var(--ketchup-dark) 100%);
+  color: var(--cream);
+  font-weight: 600;
+  box-shadow: 0 3px 0 #6b1515, 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: filter 0.15s, transform 0.1s;
+}
+
+.btn-food:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn-food:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #6b1515;
+}
+
+.btn-food:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-food-outline {
+  border-radius: 0.5rem;
+  border: 1px solid var(--food-border-light);
+  background: rgba(26, 18, 12, 0.6);
+  color: var(--cream);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.btn-food-outline:hover:not(:disabled) {
+  border-color: var(--mustard);
+  background: rgba(53, 38, 24, 0.8);
+}
+
+.food-alert {
+  border-radius: 0.5rem;
+  border: 1px solid rgba(247, 181, 56, 0.45);
+  background: rgba(247, 181, 56, 0.12);
+  color: var(--mustard-light);
+}
+
+.food-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: rgba(214, 40, 40, 0.25);
+  color: var(--mustard-light);
+  border: 1px solid rgba(247, 181, 56, 0.35);
+}
+
+.food-cart {
+  border-radius: 0.875rem;
+  border: 2px solid var(--mustard);
+  background: linear-gradient(180deg, #3a281c 0%, #2a1e14 100%);
+  box-shadow:
+    0 0 24px rgba(247, 181, 56, 0.12),
+    inset 0 1px 0 rgba(255, 244, 224, 0.08);
+}
+
+/* Caja — panel de cobro (borde suave, montos alineados) */
+.caja-detail {
+  border-left: 3px solid rgba(247, 181, 56, 0.45);
+}
+
+.caja-order-card {
+  background: linear-gradient(165deg, rgba(45, 32, 22, 0.95) 0%, rgba(35, 25, 17, 0.98) 100%);
+}
+
+.caja-order-card--active {
+  border-color: rgba(247, 181, 56, 0.55);
+  background: linear-gradient(165deg, rgba(58, 42, 28, 0.98) 0%, rgba(42, 30, 20, 1) 100%);
+  box-shadow:
+    0 0 0 1px rgba(247, 181, 56, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.caja-line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 1rem 1.5rem;
+}
+
+.caja-line--total {
+  align-items: center;
+  padding-top: 0.25rem;
+}
+
+.caja-amount {
+  font-family: var(--font-fredoka), sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--mustard);
+  text-align: right;
+  min-width: 5.5rem;
+  white-space: nowrap;
+}
+
+.caja-amount--total {
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.local-seat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--food-border);
+  padding: 1rem 1.125rem;
+  background: linear-gradient(165deg, rgba(45, 32, 22, 0.95) 0%, rgba(35, 25, 17, 0.98) 100%);
+}
+
+.local-seat--free {
+  border-color: rgba(74, 222, 128, 0.35);
+  background: linear-gradient(165deg, rgba(30, 50, 35, 0.5) 0%, rgba(35, 25, 17, 0.98) 100%);
+}
+
+.local-seat--busy {
+  border-color: rgba(214, 40, 40, 0.35);
+  background: linear-gradient(165deg, rgba(50, 28, 28, 0.45) 0%, rgba(35, 25, 17, 0.98) 100%);
+}
+
+.local-seat-badge {
+  border-radius: 9999px;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.local-seat--free .local-seat-badge {
+  background: rgba(74, 222, 128, 0.15);
+  color: #86efac;
+  border: 1px solid rgba(74, 222, 128, 0.35);
+}
+
+.local-seat--busy .local-seat-badge {
+  background: rgba(214, 40, 40, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(214, 40, 40, 0.35);
+}
+
+.food-table thead {
+  background: rgba(26, 18, 12, 0.9);
+  color: var(--food-muted);
+}
+
+.food-table tbody tr {
+  border-bottom: 1px solid rgba(92, 64, 51, 0.5);
+}
+
+.food-table tbody tr:hover {
+  background: rgba(53, 38, 24, 0.4);
+}
+
+/* Ticket de venta — impresión térmica / PDF */
+.receipt-paper {
+  background: var(--diner-paper);
+  color: #1a120c;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.receipt-awning {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--ketchup) 0,
+    var(--ketchup) 8px,
+    var(--mustard) 8px,
+    var(--mustard) 16px
+  );
+}
+
+.receipt-print-footer {
+  display: none;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px dashed rgba(92, 64, 51, 0.45);
+  text-align: center;
+}
+
+.receipt-exporting .receipt-print-footer,
+body.receipt-print-mode .receipt-print-footer {
+  display: block;
+}
+
+.receipt-exporting .no-print,
+body.receipt-print-mode .no-print {
+  display: none !important;
+}
+
+.receipt-exporting .receipt-screen-note,
+body.receipt-print-mode .receipt-screen-note {
+  display: none !important;
+}
+
+@page {
+  size: 80mm auto;
+  margin: 5mm;
+}
+
+@media print {
+  html,
+  body {
+    width: 80mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff8eb !important;
+    color: #1a120c !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  body.receipt-print-mode .receipt-overlay,
+  body.receipt-print-mode .receipt-overlay * {
+    visibility: visible;
+  }
+
+  body.receipt-print-mode .receipt-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    background: #fff8eb !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  body.receipt-print-mode #sales-receipt-print {
+    visibility: visible;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    width: 72mm !important;
+    max-width: 72mm !important;
+    margin: 0 auto !important;
+    padding: 6mm 4mm !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: #fff8eb !important;
+  }
+
+  body.receipt-print-mode #sales-receipt-print * {
+    visibility: visible;
+  }
+
+  body.receipt-print-mode .no-print {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  body.receipt-print-mode .receipt-print-footer {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  body.receipt-print-mode .receipt-screen-note {
+    display: none !important;
+  }
+}
+
+/* Cartel QR disponibilidad — impresión A4 / carta */
+.local-qr-print-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+  background: #fff8eb;
+  color: #1a120c;
+}
+
+.local-qr-print-brand {
+  font-family: var(--font-fredoka), sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8b4513;
+}
+
+.local-qr-print-title {
+  font-family: var(--font-fredoka), sans-serif;
+  margin-top: 0.75rem;
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #1a120c;
+}
+
+.local-qr-print-sub {
+  margin-top: 0.5rem;
+  font-size: 1.125rem;
+  color: #5c4033;
+}
+
+.local-qr-print-code {
+  margin-top: 1.5rem;
+  border-radius: 0.5rem;
+}
+
+.local-qr-print-url {
+  margin-top: 1rem;
+  max-width: 20rem;
+  word-break: break-all;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.65rem;
+  color: #5c4033;
+}
+
+.local-qr-print-foot {
+  margin-top: 1.25rem;
+  font-size: 0.875rem;
+  color: #8b4513;
+}
+
+@media print {
+  body.qr-print-mode {
+    background: #fff8eb !important;
+  }
+
+  body.qr-print-mode * {
+    visibility: hidden;
+  }
+
+  body.qr-print-mode .local-qr-print,
+  body.qr-print-mode .local-qr-print * {
+    visibility: visible;
+  }
+
+  body.qr-print-mode .local-qr-print {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+  }
+
+  body.qr-print-mode .local-qr-print-inner {
+    min-height: 100vh;
+  }
+}
