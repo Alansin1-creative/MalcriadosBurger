@@ -11,7 +11,8 @@
         "data",
         ".next",
         ".env*"
-      ]
+      ],
+      "alwaysDeployFromSource": true
     }
   ]
 }
