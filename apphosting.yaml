@@ -25,17 +25,15 @@ env:
       - BUILD
       - RUNTIME
 
-  # Secretos: créalos con `firebase apphosting:secrets:set NOMBRE` y descomenta.
-  # Mientras no existan en Secret Manager, el deploy falla.
-  # - variable: ADMIN_EMAIL
-  #   secret: ADMIN_EMAIL
-  # - variable: ADMIN_PASSWORD
-  #   secret: ADMIN_PASSWORD
-  # - variable: MERCADOPAGO_ACCESS_TOKEN
-  #   secret: MERCADOPAGO_ACCESS_TOKEN
-  # - variable: MERCADOPAGO_PAYMENT_LINK
-  #   secret: MERCADOPAGO_PAYMENT_LINK
-  # - variable: RESEND_API_KEY
-  #   secret: RESEND_API_KEY
-  # - variable: EMAIL_FROM
-  #   secret: EMAIL_FROM
+  - variable: ADMIN_EMAIL
+    secret: ADMIN_EMAIL
+  - variable: ADMIN_PASSWORD
+    secret: ADMIN_PASSWORD
+  - variable: MERCADOPAGO_ACCESS_TOKEN
+    secret: MERCADOPAGO_ACCESS_TOKEN
+  - variable: MERCADOPAGO_PAYMENT_LINK
+    secret: MERCADOPAGO_PAYMENT_LINK
+  - variable: RESEND_API_KEY
+    secret: RESEND_API_KEY
+  - variable: EMAIL_FROM
+    secret: EMAIL_FROM
