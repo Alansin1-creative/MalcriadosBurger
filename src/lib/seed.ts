@@ -117,7 +117,7 @@ export function seedMalcriados(force = false) {
     }
     const tax = 0;
     const total = subtotal;
-    const tableId = (sale.daysAgo % 6) + 1;
+    const tableId = (sale.daysAgo % RESTAURANT_SEATING.length) + 1;
     const result = insertOrder.run(tableId, subtotal, tax, total, created, created);
     const orderId = result.lastInsertRowid;
     for (const [productId, qty, unitPrice] of lineItems) {

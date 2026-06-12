@@ -23,9 +23,19 @@ export default function LoginForm() {
         credentials: 'same-origin',
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
+      let data: { message?: string; user?: { role: 'client' | 'admin' } } = {};
+      try {
+        data = await res.json();
+      } catch {
+        setError('No se pudo conectar con el servidor');
+        return;
+      }
       if (!res.ok) {
         setError(data.message || 'Error al iniciar sesión');
+        return;
+      }
+      if (!data.user) {
+        setError('Respuesta inválida del servidor');
         return;
       }
 
