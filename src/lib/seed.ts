@@ -141,18 +141,32 @@ export function seedMalcriados(force = false) {
 
 export function seedIfEmpty() {
   const seeded = seedMalcriados(false);
-  seedAdminUserSync();
+  ensureAdminUser();
   return seeded;
 }
 
-function seedAdminUserSync() {
+/** Crea o actualiza el admin bootstrap desde ADMIN_EMAIL / ADMIN_PASSWORD. */
+export function ensureAdminUser() {
   const db = getDb();
-  const count = db.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number };
-  if (count.c > 0) return;
-
   const email = (process.env.ADMIN_EMAIL ?? 'admin@malcriados.com').toLowerCase();
   const password = process.env.ADMIN_PASSWORD ?? 'admin123';
   const hash = bcrypt.hashSync(password, 12);
+
+  const existing = db
+    .prepare('SELECT id, role FROM users WHERE email = ?')
+    .get(email) as { id: number; role: string } | undefined;
+
+  if (existing) {
+    if (existing.role !== 'admin') return;
+    db.prepare(
+      `UPDATE users
+       SET password_hash = ?, active = 1, email_verified = 1, phone_verified = 1
+       WHERE id = ?`
+    ).run(hash, existing.id);
+    console.log(`[seed] Admin actualizado: ${email}`);
+    return;
+  }
+
   db.prepare(
     `INSERT INTO users (email, password_hash, name, role, email_verified, phone_verified)
      VALUES (?, ?, ?, ?, 1, 1)`
