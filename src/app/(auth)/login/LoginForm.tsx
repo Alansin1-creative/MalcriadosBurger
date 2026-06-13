@@ -4,6 +4,7 @@ import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { defaultPathForRole } from '@/contexts/AuthContext';
+import { PasswordField } from '@/components/PasswordField';
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -80,14 +81,10 @@ export default function LoginForm() {
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-food-muted">Contraseña</label>
-            <input
-              type="password"
-              required
-              autoComplete="current-password"
+            <PasswordField
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="food-input w-full"
-              placeholder="••••••••"
+              onChange={setPassword}
+              autoComplete="current-password"
             />
           </div>
           {error && <div className="food-alert px-3 py-2 text-sm">{error}</div>}

@@ -4,6 +4,7 @@ import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import { defaultPathForRole } from '@/contexts/AuthContext';
 import { PasswordStrength } from '@/components/PasswordStrength';
+import { PasswordField } from '@/components/PasswordField';
 import { isPasswordStrong } from '@/lib/auth/password-policy';
 
 type Step = 'form' | 'verify';
@@ -153,13 +154,10 @@ export default function RegisterPage() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-food-muted">Contraseña</label>
-              <input
-                type="password"
-                required
-                autoComplete="new-password"
+              <PasswordField
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="food-input w-full"
+                onChange={setPassword}
+                autoComplete="new-password"
                 placeholder="Contraseña segura"
               />
               <PasswordStrength password={password} />

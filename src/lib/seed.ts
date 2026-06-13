@@ -141,28 +141,35 @@ export function seedMalcriados(force = false) {
 
 export function seedIfEmpty() {
   const seeded = seedMalcriados(false);
-  ensureAdminUser();
   return seeded;
 }
 
 /** Crea o actualiza el admin bootstrap desde ADMIN_EMAIL / ADMIN_PASSWORD. */
 export function ensureAdminUser() {
   const db = getDb();
-  const email = (process.env.ADMIN_EMAIL ?? 'admin@malcriados.com').toLowerCase();
-  const password = process.env.ADMIN_PASSWORD ?? 'admin123';
+  const email = (process.env.ADMIN_EMAIL ?? 'admin@malcriados.com').trim().toLowerCase();
+  const password = (process.env.ADMIN_PASSWORD ?? 'admin123').trim();
   const hash = bcrypt.hashSync(password, 12);
 
   const existing = db
-    .prepare('SELECT id, role FROM users WHERE email = ?')
+    .prepare('SELECT id, role FROM users WHERE trim(email) = ? COLLATE NOCASE')
     .get(email) as { id: number; role: string } | undefined;
 
-  if (existing) {
-    if (existing.role !== 'admin') return;
+  const fallbackAdmin = !existing
+    ? (db.prepare(`SELECT id, role FROM users WHERE role = 'admin' LIMIT 1`).get() as
+        | { id: number; role: string }
+        | undefined)
+    : undefined;
+
+  const row = existing ?? fallbackAdmin;
+
+  if (row) {
+    if (row.role !== 'admin') return;
     db.prepare(
       `UPDATE users
-       SET password_hash = ?, active = 1, email_verified = 1, phone_verified = 1
+       SET email = ?, password_hash = ?, active = 1, email_verified = 1, phone_verified = 1
        WHERE id = ?`
-    ).run(hash, existing.id);
+    ).run(email, hash, row.id);
     console.log(`[seed] Admin actualizado: ${email}`);
     return;
   }

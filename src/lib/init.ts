@@ -1,5 +1,5 @@
 import { getDb } from './db';
-import { seedIfEmpty } from './seed';
+import { seedIfEmpty, ensureAdminUser } from './seed';
 import { ensureSeatingLayout } from './services/seating';
 import { ensureMenuProducts } from './services/menu-sync';
 
@@ -9,6 +9,11 @@ export function ensureInitialized() {
   if (initialized) return;
 
   getDb();
+  try {
+    ensureAdminUser();
+  } catch (err) {
+    console.error('[init] ensureAdminUser failed:', err);
+  }
   try {
     seedIfEmpty();
   } catch (err) {
