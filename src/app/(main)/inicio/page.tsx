@@ -15,6 +15,8 @@ import {
 import { comboEstimatedTotal } from '@/lib/combo-order';
 import { PageHeader } from '@/components/PageHeader';
 import { useRequireAuth } from '@/contexts/AuthContext';
+import { listActiveProducts } from '@/lib/firebase/products';
+import { getRestaurantStatus } from '@/lib/firebase/settings';
 
 type Product = { id: number; name: string; price: number; category: string };
 
@@ -81,12 +83,10 @@ export default function InicioPage() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    fetch('/api/products')
-      .then((r) => r.json())
+    listActiveProducts()
       .then(setProducts)
       .catch(() => setProducts([]));
-    fetch('/api/restaurant/status')
-      .then((r) => r.json())
+    getRestaurantStatus()
       .then((d) => setRestaurantOpen(d.isOpen))
       .catch(() => setRestaurantOpen(true));
   }, []);

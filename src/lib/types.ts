@@ -13,7 +13,7 @@ export interface User {
 }
 
 export interface SessionUser {
-  id: number;
+  uid: string;
   email: string;
   name: string;
   role: UserRole;
@@ -73,6 +73,7 @@ export interface Order {
   id: number;
   table_id: number | null;
   user_id: number | null;
+  user_uid?: string | null;
   order_type: OrderType;
   service_mode?: ServiceMode | null;
   payment_method?: PaymentMethod | null;

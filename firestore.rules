@@ -1,0 +1,82 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function profile() {
+      return get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && profile().role == 'admin';
+    }
+
+    function isActiveUser() {
+      return isSignedIn() && profile().active == 1;
+    }
+
+    match /profiles/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if isSignedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.role == 'client'
+        && request.resource.data.active == 1;
+      allow update: if (request.auth.uid == uid && isActiveUser()) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /products/{productId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /tables/{tableId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /_counters/{counterId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /orders/{orderId} {
+      allow read: if isActiveUser() && (
+        resource.data.user_uid == request.auth.uid || isAdmin()
+      );
+      allow create: if isActiveUser()
+        && request.resource.data.user_uid == request.auth.uid
+        && request.resource.data.order_type == 'online'
+        && request.resource.data.status == 'open';
+      allow update: if isAdmin() || (
+        isActiveUser()
+        && resource.data.user_uid == request.auth.uid
+        && resource.data.status == 'open'
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status'])
+          || request.resource.data.status == 'preparing'
+        )
+      );
+
+      match /lines/{lineId} {
+        allow read: if isActiveUser() && (
+          get(/databases/$(database)/documents/orders/$(orderId)).data.user_uid == request.auth.uid
+          || isAdmin()
+        );
+        allow write: if isAdmin() || (
+          isActiveUser()
+          && get(/databases/$(database)/documents/orders/$(orderId)).data.user_uid == request.auth.uid
+          && get(/databases/$(database)/documents/orders/$(orderId)).data.status == 'open'
+        );
+      }
+    }
+  }
+}

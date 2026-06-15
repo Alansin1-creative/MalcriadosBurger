@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { RefreshCw } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { getRestaurantStatus } from '@/lib/firebase/settings';
+import { listRestaurantSeating, seatingSummary } from '@/lib/firebase/tables';
 
 interface Seat {
   id: number;
@@ -41,14 +43,17 @@ export function LocalAvailabilityContent() {
   const [data, setData] = useState<AvailabilityData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(() => {
-    fetch('/api/local/disponibilidad')
-      .then((r) => r.json())
-      .then((d) => {
-        setData(d);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+  const load = useCallback(async () => {
+    try {
+      const { isOpen } = await getRestaurantStatus();
+      const seats = await listRestaurantSeating();
+      const summary = seatingSummary(seats, isOpen);
+      setData({ ...summary, updatedAt: new Date().toISOString() });
+    } catch {
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {

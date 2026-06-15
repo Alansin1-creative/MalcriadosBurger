@@ -4,6 +4,8 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import { useRouter } from 'next/navigation';
 import type { SessionUser } from '@/lib/types';
 import { defaultPathForRole, isAdminPath, isAuthPath } from '@/lib/auth/routes';
+import { signOutUser, subscribeAuth, getUserProfile, profileToSessionUser } from '@/lib/firebase/auth';
+import { getClientAuth } from '@/lib/firebase/config';
 
 type AuthContextValue = {
   user: SessionUser | null;
@@ -20,30 +22,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const refresh = useCallback(async () => {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12_000);
-    try {
-      const res = await fetch('/api/auth/me', {
-        credentials: 'same-origin',
-        signal: controller.signal,
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data.user ?? null);
-      } else {
-        setUser(null);
-      }
-    } catch {
+    const fbUser = getClientAuth().currentUser;
+    if (!fbUser) {
       setUser(null);
-    } finally {
-      clearTimeout(timeout);
       setLoading(false);
+      return;
     }
+    const profile = await getUserProfile(fbUser.uid);
+    if (!profile || profile.active !== 1) {
+      setUser(null);
+    } else {
+      setUser(profileToSessionUser(profile));
+    }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    const unsubscribe = subscribeAuth((nextUser) => {
+      setUser(nextUser);
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     if (loading || !user) return;
@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, loading, router]);
 
   const logout = useCallback(async () => {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+    await signOutUser();
     setUser(null);
     window.location.href = '/login';
   }, []);

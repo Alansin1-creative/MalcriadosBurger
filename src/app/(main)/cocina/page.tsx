@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Check, Clock, Flame, RotateCcw, Timer } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
+import { listKitchenOrders, updateOrderStatus } from '@/lib/firebase/orders';
 import type { Order, OrderLine, OrderStatus } from '@/lib/types';
 
 type KitchenOrder = Order & { lines: OrderLine[] };
@@ -84,8 +85,7 @@ export default function CocinaPage() {
   const [, setTick] = useState(0);
 
   const load = useCallback(() => {
-    fetch('/api/kitchen')
-      .then((r) => r.json())
+    listKitchenOrders()
       .then((data) => {
         setOrders(data);
         setLoading(false);
@@ -109,18 +109,14 @@ export default function CocinaPage() {
   async function setStatus(orderId: number, status: OrderStatus) {
     setUpdatingId(orderId);
     setMessage('');
-    const res = await fetch('/api/kitchen', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId, status }),
-    });
-    const data = await res.json();
-    setUpdatingId(null);
-    if (!res.ok) {
-      setMessage(data.message || 'No se pudo actualizar');
-      return;
+    try {
+      await updateOrderStatus(orderId, status);
+      load();
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'No se pudo actualizar');
+    } finally {
+      setUpdatingId(null);
     }
-    load();
   }
 
   const byStatus = (status: OrderStatus) => orders.filter((o) => o.status === status);

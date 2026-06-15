@@ -1,5 +1,12 @@
 {
   "projects": {
     "default": "malcriadosburger-958b8"
+  },
+  "targets": {
+    "malcriadosburger-958b8": {
+      "hosting": {
+        "malcriadosburger": ["malcriadosburger"]
+      }
+    }
   }
 }

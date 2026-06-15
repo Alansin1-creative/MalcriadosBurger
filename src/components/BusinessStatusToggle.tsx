@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Power } from 'lucide-react';
+import { getRestaurantStatus, setRestaurantOpen } from '@/lib/firebase/settings';
 
 type Props = {
   compact?: boolean;
@@ -14,8 +15,7 @@ export function BusinessStatusToggle({ compact = false }: Props) {
   const [error, setError] = useState('');
 
   const load = useCallback(() => {
-    fetch('/api/restaurant/status')
-      .then((r) => r.json())
+    getRestaurantStatus()
       .then((d) => {
         setIsOpen(d.isOpen);
         setUpdatedAt(d.updatedAt);
@@ -33,20 +33,15 @@ export function BusinessStatusToggle({ compact = false }: Props) {
     if (isOpen === null || saving) return;
     setSaving(true);
     setError('');
-    const next = !isOpen;
-    const res = await fetch('/api/restaurant/status', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ isOpen: next }),
-    });
-    const data = await res.json();
-    setSaving(false);
-    if (!res.ok) {
-      setError(data.message || 'No se pudo actualizar');
-      return;
+    try {
+      const data = await setRestaurantOpen(!isOpen);
+      setIsOpen(data.isOpen);
+      setUpdatedAt(data.updatedAt);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo actualizar');
+    } finally {
+      setSaving(false);
     }
-    setIsOpen(data.isOpen);
-    setUpdatedAt(data.updatedAt);
   }
 
   if (isOpen === null) {

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { defaultPathForRole } from '@/contexts/AuthContext';
 import { PasswordField } from '@/components/PasswordField';
+import { signIn } from '@/lib/firebase/auth';
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -18,38 +19,22 @@ export default function LoginForm() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify({ email, password }),
-      });
-      let data: { message?: string; user?: { role: 'client' | 'admin' } } = {};
-      try {
-        data = await res.json();
-      } catch {
-        setError('No se pudo conectar con el servidor');
-        return;
-      }
-      if (!res.ok) {
-        setError(data.message || 'Error al iniciar sesión');
-        return;
-      }
-      if (!data.user) {
-        setError('Respuesta inválida del servidor');
-        return;
-      }
-
+      const user = await signIn(email, password);
       const next = searchParams.get('next');
       const dest =
         next && next !== '/login' && next !== '/register'
           ? next
-          : defaultPathForRole(data.user.role);
-
-      // Recarga completa para que el navegador aplique las cookies de sesión
+          : defaultPathForRole(user.role);
       window.location.href = dest;
-    } catch {
-      setError('No se pudo conectar con el servidor');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
+      if (message.includes('auth/invalid-credential') || message.includes('auth/wrong-password')) {
+        setError('Correo o contraseña incorrectos');
+      } else if (message.includes('auth/user-not-found')) {
+        setError('Correo o contraseña incorrectos');
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }

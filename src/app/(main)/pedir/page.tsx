@@ -25,6 +25,14 @@ import { getComboById, MENU_CATEGORIES } from '@/lib/data/combos';
 import { isPublicMenuProduct } from '@/lib/data/malcriados-menu';
 import { resolveComboLines } from '@/lib/combo-order';
 import { useRequireAuth } from '@/contexts/AuthContext';
+import { listActiveProducts } from '@/lib/firebase/products';
+import { getRestaurantStatus } from '@/lib/firebase/settings';
+import {
+  createOrResumeOnlineOrder,
+  getActiveOnlineOrderForUser,
+  getOrderLines,
+  submitOnlineOrder,
+} from '@/lib/firebase/orders';
 
 interface Product {
   id: number;
@@ -87,9 +95,9 @@ function PedirPageContent() {
     (Boolean(activeOrder?.blocksNewOrder) && !editingOpenOrder);
 
   const loadActiveOrder = useCallback(() => {
-    fetch('/api/orders?mine=1&active=1')
-      .then((r) => r.json())
-      .then((data: (Order & { blocksNewOrder?: boolean; message?: string | null; lines?: OrderLine[] }) | null) => {
+    if (!user?.uid) return;
+    getActiveOnlineOrderForUser(user.uid)
+      .then((data) => {
         if (!data || !data.id) {
           setActiveOrder(null);
           return;
@@ -105,19 +113,17 @@ function PedirPageContent() {
         }
       })
       .catch(() => setActiveOrder(null));
-  }, []);
+  }, [user?.uid]);
 
   useEffect(() => {
-    fetch('/api/products')
-      .then((r) => r.json())
+    listActiveProducts()
       .then(setProducts)
       .catch(() => setProducts([]));
   }, []);
 
   useEffect(() => {
     const loadStatus = () => {
-      fetch('/api/restaurant/status')
-        .then((r) => r.json())
+      getRestaurantStatus()
         .then((d) => setRestaurantOpen(d.isOpen))
         .catch(() => setRestaurantOpen(true));
     };
@@ -191,11 +197,19 @@ function PedirPageContent() {
     if (comboAppliedRef.current) return;
 
     let cancelled = false;
-    fetch(`/api/orders/${orderId}`)
-      .then((r) => r.json())
+    getOrderLines(orderId)
       .then((lines) => {
         if (cancelled) return;
-        const syncLines = apiLinesToSyncLines(lines);
+        const syncLines = apiLinesToSyncLines(
+          lines.map((l) => ({
+            product_id: l.product_id,
+            quantity: l.quantity,
+            unit_price: l.unit_price,
+            display_name: l.display_name,
+            product_name: l.product_name,
+            modifiers_json: l.modifiers_json,
+          }))
+        );
         const items = linesToCart(syncLines);
         setCart(items);
         setBaseline(syncLines);
@@ -210,18 +224,13 @@ function PedirPageContent() {
 
   const ensureOrder = useCallback(async () => {
     if (orderId) return orderId;
-    const res = await fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'create' }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'No se pudo crear el pedido');
-    setOrderId(data.orderId);
+    if (!user?.uid) throw new Error('Inicia sesión para pedir');
+    const id = await createOrResumeOnlineOrder(user.uid);
+    setOrderId(id);
     setBaseline([]);
-    loadedOrderRef.current = data.orderId;
-    return data.orderId as number;
-  }, [orderId, setBaseline]);
+    loadedOrderRef.current = id;
+    return id;
+  }, [orderId, setBaseline, user?.uid]);
 
   useEffect(() => {
     if (!cart.length || orderId || orderingBlocked) return;
@@ -365,37 +374,14 @@ function PedirPageContent() {
       const syncResult = await syncOrderCartLines(id, cartToLines(cart));
       if (!syncResult.ok) throw new Error(syncResult.message);
 
-      const submitRes = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'submit',
-          orderId: id,
-          serviceMode: payload.serviceMode,
-          tableId: payload.tableId,
-          paymentMethod: payload.paymentMethod,
-        }),
+      await submitOnlineOrder(id, {
+        serviceMode: payload.serviceMode,
+        tableId: payload.tableId,
+        paymentMethod: payload.paymentMethod === 'online' ? 'cash' : payload.paymentMethod,
       });
-      const submitData = await submitRes.json();
-      if (!submitRes.ok) throw new Error(submitData.message || 'Error al enviar');
 
       if (payload.paymentMethod === 'online') {
-        const mpRes = await fetch('/api/payments/mercadopago', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId: id }),
-        });
-        const mpData = await mpRes.json();
-        if (!mpRes.ok) throw new Error(mpData.message || 'No se pudo abrir Mercado Pago');
-
-        setSubmitModalOpen(false);
-        setOrderId(null);
-        setCart([]);
-        loadedOrderRef.current = null;
-        loadActiveOrder();
-
-        window.location.href = mpData.checkoutUrl;
-        return;
+        throw new Error('Pago en línea no disponible en la versión web. Elige efectivo.');
       }
 
       const modeNote =

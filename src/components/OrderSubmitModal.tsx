@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Banknote, CreditCard, ShoppingBag, UtensilsCrossed } from 'lucide-react';
+import { listRestaurantSeating } from '@/lib/firebase/tables';
+import { getRestaurantStatus } from '@/lib/firebase/settings';
 import type { PaymentMethod, ServiceMode } from '@/lib/types';
 
 interface SeatOption {
@@ -68,27 +70,23 @@ export function OrderSubmitModal({
 
   useEffect(() => {
     if (!open || step !== 'payment') return;
-    fetch('/api/payments/mercadopago')
-      .then((r) => r.json())
-      .then((d) => {
-        setMpAvailable(Boolean(d.configured));
-        setMpMode(d.mode === 'api' || d.mode === 'link' ? d.mode : null);
-      })
-      .catch(() => {
-        setMpAvailable(false);
-        setMpMode(null);
-      });
+    setMpAvailable(false);
+    setMpMode(null);
   }, [open, step]);
 
   async function chooseDineIn() {
     setLoadingSeats(true);
     setSeatError('');
     try {
-      const res = await fetch('/api/local/disponibilidad');
-      const data = await res.json();
-      if (!res.ok) throw new Error('No se pudo cargar la disponibilidad');
+      const { isOpen } = await getRestaurantStatus();
+      const list = await listRestaurantSeating();
+      const summary = { seats: list, isOpen };
+      if (!summary.isOpen) {
+        setSeatError('El local está cerrado. Elige para llevar.');
+        setLoadingSeats(false);
+        return;
+      }
 
-      const list: SeatOption[] = data.seats ?? [];
       const freeSeats = list.filter((s) => s.status === 'free');
 
       if (freeSeats.length === 0) {
@@ -98,7 +96,7 @@ export function OrderSubmitModal({
       }
 
       setServiceMode('dine_in');
-      setSeats(list);
+      setSeats(freeSeats);
       setStep('seat');
     } catch {
       setSeatError('No se pudo verificar los asientos');

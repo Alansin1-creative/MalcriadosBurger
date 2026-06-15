@@ -2,6 +2,7 @@ import {
   parseModifiersPayload,
   type ModifiersPayload,
 } from '@/lib/data/product-modifiers';
+import { replaceOrderLines } from '@/lib/firebase/orders';
 
 export type OrderCartLine = {
   productId: number;
@@ -70,18 +71,19 @@ export async function syncOrderCartLines(
   orderId: number,
   lines: OrderCartLine[]
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  const res = await fetch('/api/orders', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'sync_cart',
+  try {
+    await replaceOrderLines(
       orderId,
-      lines,
-    }),
-  });
-  const data = await res.json();
-  if (!res.ok) {
-    return { ok: false, message: data.message || 'Error al guardar el pedido' };
+      lines.map((l) => ({
+        productId: l.productId,
+        quantity: l.quantity,
+        unitPrice: l.unitPrice,
+        displayName: l.displayName,
+        modifiers: l.modifiers,
+      }))
+    );
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, message: err instanceof Error ? err.message : 'Error al guardar' };
   }
-  return { ok: true };
 }

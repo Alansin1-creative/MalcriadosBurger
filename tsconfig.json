@@ -23,5 +23,16 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "src/lib/firestore/**",
+    "src/lib/services/**",
+    "src/lib/db.ts",
+    "src/lib/init.ts",
+    "src/lib/seed.ts",
+    "src/lib/auth/session.ts",
+    "src/lib/data/backend.ts",
+    "src/lib/ocr/**",
+    "src/lib/ai/**"
+  ]
 }

@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { Check, ChefHat, Clock, Package, Receipt } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { useRequireAuth } from '@/contexts/AuthContext';
+import { listMyOrdersWithLines } from '@/lib/firebase/orders';
 import type { Order, OrderLine, OrderStatus } from '@/lib/types';
 
 type OrderWithLines = Order & { lines?: OrderLine[] };
@@ -197,19 +198,19 @@ function OrderTracker({ order }: { order: Order }) {
 }
 
 function MisPedidosPageContent() {
-  useRequireAuth();
+  const { user } = useRequireAuth();
   const searchParams = useSearchParams();
   const [orders, setOrders] = useState<OrderWithLines[]>([]);
   const [loading, setLoading] = useState(true);
   const [paymentMessage, setPaymentMessage] = useState('');
 
   const load = useCallback(() => {
-    fetch('/api/orders?mine=1&withLines=1')
-      .then((r) => r.json())
+    if (!user?.uid) return;
+    listMyOrdersWithLines(user.uid)
       .then(setOrders)
       .catch(() => setOrders([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user?.uid]);
 
   useEffect(() => {
     load();
@@ -223,21 +224,8 @@ function MisPedidosPageContent() {
     if (!pago || !pedido) return;
 
     if (pago === 'ok') {
-      fetch('/api/payments/mercadopago/confirm', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: Number(pedido) }),
-      })
-        .then((r) => r.json())
-        .then((d) => {
-          if (d.ok) {
-            setPaymentMessage('¡Pago confirmado! Tu pedido sigue en cocina.');
-          } else {
-            setPaymentMessage(d.message || 'No se pudo confirmar el pago aún.');
-          }
-          load();
-        })
-        .catch(() => setPaymentMessage('No se pudo verificar el pago.'));
+      setPaymentMessage('Gracias. Revisa el estado de tu pedido abajo.');
+      load();
     } else if (pago === 'error') {
       setPaymentMessage('El pago no se completó. Intenta de nuevo desde Hacer pedido.');
     } else if (pago === 'pendiente') {
